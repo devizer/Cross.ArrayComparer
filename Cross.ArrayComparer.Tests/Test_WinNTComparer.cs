@@ -74,12 +74,23 @@ namespace Cross.ArrayComparer.Tests
         {
             Assert.IsTrue(WinNtComparer.IsSupported, "WinNtComparer supports windows only and requires full trust");
 
-            foreach (var length in new[] { 1, 16 })
+            foreach (var length in new[] { 1, 16, 32, 64, 128, 512, 1024, 65536, 256*1024, 1024*1024 })
             {
                 var arr = GetRandomBytes(1, length);
                 var same = GetRandomBytes(1, length);
                 var another = GetRandomBytes(2, length);
                 const int n = 100000;
+
+                {
+                    Stopwatch sw = Stopwatch.StartNew();
+                    for (int i = 0; i < n; i++)
+                    {
+                        Assert.IsTrue(ArrayExtensions.EqualsTo(arr, same));
+                        Assert.IsFalse(ArrayExtensions.EqualsTo(arr, another));
+                    }
+                    var elapsed = sw.Elapsed;
+                    if (length != 1) Trace.WriteLine("ArrayExtensions:" + elapsed);
+                }
 
                 {
                     Stopwatch sw = Stopwatch.StartNew();
@@ -92,16 +103,6 @@ namespace Cross.ArrayComparer.Tests
                     if (length != 1) Trace.WriteLine("WinNtComparer:" + elapsed);
                 }
 
-                {
-                    Stopwatch sw = Stopwatch.StartNew();
-                    for (int i = 0; i < n; i++)
-                    {
-                        Assert.IsTrue(ArrayExtensions.EqualsTo(arr, same));
-                        Assert.IsFalse(ArrayExtensions.EqualsTo(arr, another));
-                    }
-                    var elapsed = sw.Elapsed;
-                    if (length != 1) Trace.WriteLine("ArrayExtensions:" + elapsed);
-                }
             }
         }
 
