@@ -6,7 +6,7 @@ namespace CodeJam.Collections
 {
     using System.Diagnostics.Contracts;
 
-    static class ArrayExtensions
+    public static class ArrayExtensions
 	{
 		#region byte
 		/// <summary>

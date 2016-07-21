@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Cross.ArrayComparer.Tests
 {
+    using System.Diagnostics;
+
+    using CodeJam.Collections;
+
     using NUnit.Framework;
 
     [TestFixture]
@@ -13,8 +17,10 @@ namespace Cross.ArrayComparer.Tests
     {
 
         [Test]
-        public void Test_Bytes()
+        public void Asserts_Bytes()
         {
+            Assert.IsTrue(WinNtComparer.IsSupported, "WinNtComparer supports windows only and requires full trust");
+
             for (int i = 1; i < 100; i++)
             {
                 int length = 32 * 1024;
@@ -23,6 +29,95 @@ namespace Cross.ArrayComparer.Tests
                 Assert.IsTrue(WinNtComparer.Equals(arr, same));
 
                 var another = GetRandomBytes(i + 1, length);
+                Assert.IsFalse(WinNtComparer.Equals(arr, another));
+            }
+        }
+
+        [Test]
+        public void Perfomance_Large_Arrays_of_Bytes()
+        {
+            Assert.IsTrue(WinNtComparer.IsSupported, "WinNtComparer supports windows only and requires full trust");
+
+            foreach (var length in new[] { 1, 64 * 1024 * 1024 })
+            {
+                var arr = GetRandomBytes(1, length);
+                var same = GetRandomBytes(1, length);
+                var another = GetRandomBytes(2, length);
+                const int n = 10;
+
+                {
+                    Stopwatch sw = Stopwatch.StartNew();
+                    for (int i = 0; i < n; i++)
+                    {
+                        Assert.IsTrue(WinNtComparer.Equals(arr, same));
+                        Assert.IsFalse(WinNtComparer.Equals(arr, another));
+                    }
+                    var elapsed = sw.Elapsed;
+                    if (length != 1) Trace.WriteLine("WinNtComparer:" + elapsed);
+                }
+
+                {
+                    Stopwatch sw = Stopwatch.StartNew();
+                    for (int i = 0; i < n; i++)
+                    {
+                        Assert.IsTrue(ArrayExtensions.EqualsTo(arr, same));
+                        Assert.IsFalse(ArrayExtensions.EqualsTo(arr, another));
+                    }
+                    var elapsed = sw.Elapsed;
+                    if (length != 1) Trace.WriteLine("ArrayExtensions:" + elapsed);
+                }
+            }
+        }
+
+        [Test]
+        public void Perfomance_Small_Arrays_of_Bytes()
+        {
+            Assert.IsTrue(WinNtComparer.IsSupported, "WinNtComparer supports windows only and requires full trust");
+
+            foreach (var length in new[] { 1, 16 })
+            {
+                var arr = GetRandomBytes(1, length);
+                var same = GetRandomBytes(1, length);
+                var another = GetRandomBytes(2, length);
+                const int n = 100000;
+
+                {
+                    Stopwatch sw = Stopwatch.StartNew();
+                    for (int i = 0; i < n; i++)
+                    {
+                        Assert.IsTrue(WinNtComparer.Equals(arr, same));
+                        Assert.IsFalse(WinNtComparer.Equals(arr, another));
+                    }
+                    var elapsed = sw.Elapsed;
+                    if (length != 1) Trace.WriteLine("WinNtComparer:" + elapsed);
+                }
+
+                {
+                    Stopwatch sw = Stopwatch.StartNew();
+                    for (int i = 0; i < n; i++)
+                    {
+                        Assert.IsTrue(ArrayExtensions.EqualsTo(arr, same));
+                        Assert.IsFalse(ArrayExtensions.EqualsTo(arr, another));
+                    }
+                    var elapsed = sw.Elapsed;
+                    if (length != 1) Trace.WriteLine("ArrayExtensions:" + elapsed);
+                }
+            }
+        }
+
+        [Test]
+        public void Asserts_Decimals()
+        {
+            Assert.IsTrue(WinNtComparer.IsSupported, "WinNtComparer supports windows only and requires full trust");
+
+            for (int i = 1; i < 100; i++)
+            {
+                int length = 32 * 1024;
+                var arr = GetRandomDecimals(i, length);
+                var same = GetRandomDecimals(i, length);
+                Assert.IsTrue(WinNtComparer.Equals(arr, same));
+
+                var another = GetRandomDecimals(i + 1, length);
                 Assert.IsFalse(WinNtComparer.Equals(arr, another));
             }
         }
